@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <video controls autoplay></video>
+    <audio controls autoplay></audio>
+    <button id="record-video">Record</button>
+
+    <script>
+       let videoElem=document.querySelector("video");
+       let audioElem=document.querySelector("audio");
+
+        let constraint={
+            video:true,
+            audio:true
+        }
+
+        let buffer=[];
+        let mediaRecorder;
+        navigator.mediaDevices.getUserMedia(constraint)
+        .then(function(mediaStream){
+            // videoElem.srcObject=mediaStream;
+            // audioElem.srcObject=mediaStream;
+            mediaRecorder = new MediaRecorder(mediaStream);
+            
+
+            mediaRecorder.addEventListener("dataavailable",function(e){
+            buffer.push(e.data);
+            });
+
+            mediaRecorder.addEventListener("stop",function(){
+                //mime type
+                let blop=new Blob(buffer,{type:"video/mp4"});
+                const url=window.URL.createObjectURL(blop);
+                //download btn
+                let a=document.createElement("a");
+                a.download="file.mp4";
+                a.href=url;
+                a.click();
+            });
+
+        }).catch(function(err){
+            console.log(err);
+        })
+
+
+
+        let videoRecorder=document.querySelector("#record-video");
+        let recordState=false;
+
+        videoRecorder.addEventListener("click",function(){
+            if(!mediaRecorder){
+                alert("First allow media Recorder");
+                return;
+            }
+            if(recordState==false){
+                console.log("media recorder:",mediaRecorder);
+                mediaRecorder.start();
+                videoRecorder.innerHTML="Recording.....";
+                recordState=true;
+            }else{
+                mediaRecorder.stop();
+                videoRecorder.innerHTML="Record";
+                recordState=false;
+            }
+        })
+
+    </script>
+</body>
+</html>
